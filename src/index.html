@@ -29,13 +29,13 @@
     </div>
     <div class="img-container">
       <div v-if="showimgs" class="imgs-content">
-        <div class="img-body" v-for="(img) in listcutted[currentPage-1]" :key=img.fileId>
-          <img :src=img.url :id="img.fileId" alt="" @click="uploadimg">
+        <div class="img-body" v-for="(img) in listcutted[currentPage-1]" @click="uploadimg(img.fileId)" :key=img.fileId>
+          <img :src=img.url>
         </div>
       </div>
       <div class="pagination">
         <el-pagination :page-sizes="[20, 40, 60]" :page-size="100" layout="total, sizes, prev, pager, next, jumper"
-          :total="imglists.count" @current-change="currentImgs">
+          :total="imglists.count" @current-change="currentImgs" @size-change="imgreload">
         </el-pagination>
       </div>
     </div>
@@ -69,6 +69,7 @@
         pageSize: 20,
         dialogVisible: false,
         pickedimg: null,
+        pickedimgfileId: null,
       },
       methods: {
         submitForm() {
@@ -78,7 +79,6 @@
             url: ' https://www.easy-mock.com/mock/5bc457b9c1ba694ea184eea8/img',
             data: '',
             success: function (res) {
-              console.log(res.data)
               that.imglists = res.data
               that.listcutted = (that.cutImgs(that.imglists.imgURL, that.pageSize))
               that.showimgs = true
@@ -96,7 +96,6 @@
           }
           return result
         },
-
         handleClose(done) {
           this.$confirm('确认关闭？')
             .then(function (_) {
@@ -104,9 +103,10 @@
             })
             .catch(function (_) { });
         },
-        uploadimg(event) {
+        uploadimg(_id) {
           this.dialogVisible = true
-          this.pickedimg = this.getimgbyid(event.target.id, this.listcutted[this.currentPage - 1])
+          this.pickedimgfileId = _id
+          this.pickedimg = this.getimgbyid(_id, this.listcutted[this.currentPage - 1])
         },
         getimgbyid(id, list) {
           var url
@@ -120,6 +120,10 @@
         uploadgurantee() {
           this.dialogVisible = false
           //ajax 请求，确认提交图片
+        },
+        imgreload(pageSize) {
+          this.pageSize = pageSize
+          this.listcutted = (this.cutImgs(this.imglists.imgURL, this.pageSize))
         }
       },
     })
